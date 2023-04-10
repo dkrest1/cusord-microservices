@@ -1,6 +1,6 @@
 # Customer and Order Microservices with NestJS and Apache Kafka
 
-## Technologies Used
+## Technologies
 
 - NestJS Framework
 - Docker and Docker Compose

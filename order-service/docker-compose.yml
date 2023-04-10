@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Zookeeper service
+  zookeeper:
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:latest
+    ports:
+      - 2182:2182
+  # kafka service
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - 9093:9093
+    environment:
+      - KAFKA_ADVERTISED_HOST_NAME=kafka
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2182
+    volumes:
+      - ./db-data/kafka:/var/lib/kafka
+  app:
+    container_name: order-backend-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '${APP_PORT}:${APP_PORT}'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - db
+  db:
+    container_name: order-db
+    image: 'mysql:8.0.27-alpine'
+    environment:
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_DATABASE_ROOT}
+    ports:
+      - '${DB_PORT}:${DB_PORT}'
+    volumes:
+      - db-data:/var/lib/mysql/data
+
+volumes:
+  db-data:
