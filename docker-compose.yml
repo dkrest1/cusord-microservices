@@ -11,6 +11,8 @@ services:
   kafka:
     container_name: kafka
     image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
     ports:
       - 9092:9092
     environment:
@@ -18,19 +20,21 @@ services:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
     volumes:
       - ./db-data/kafka:/var/lib/kafka
-  app:
+  # customer service
+  customer:
     container_name: customer-backend-service
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: customer/Dockerfile
     ports:
       - '${APP_PORT}:${APP_PORT}'
     volumes:
       - .:/app
       - /app/node_modules
     depends_on:
-      - db
-  db:
+      - kafka
+      - customer-db
+  customer-db:
     container_name: customer-db
     image: 'postgres:14.1-alpine'
     environment:
@@ -41,6 +45,31 @@ services:
       - '${DB_PORT}:${DB_PORT}'
     volumes:
       - db-data:/var/lib/postgresql/data
-
+  # order service
+  order:
+    container_name: order-backend-service
+    build:
+      context: .
+      dockerfile: order/Dockerfile
+    ports:
+      - '${APP_PORT}:${APP_PORT}'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - kafka
+      - order-db
+  order-db:
+    container_name: order-db
+    image: 'mysql:8.0.27-alpine'
+    environment:
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_DATABASE_ROOT}
+    ports:
+      - '${DB_PORT}:${DB_PORT}'
+    volumes:
+      - db-data:/var/lib/mysql/data
 volumes:
   db-data:
