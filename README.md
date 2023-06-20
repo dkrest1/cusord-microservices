@@ -1,4 +1,4 @@
-# Customer and Order Microservices with NestJS and Apache Kafka
+# Customer and Order Microservices with NestJS and RabbitMQ
 
 ## Technologies
 
