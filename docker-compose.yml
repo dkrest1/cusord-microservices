@@ -22,15 +22,13 @@ services:
       - ./db-data/kafka:/var/lib/kafka
   # customer service
   customer:
-    container_name: customer-backend-service
-    build:
-      context: .
-      dockerfile: customer/Dockerfile
+    container_name: customer-service
+    build: ./customer-service
+    image: customer
     ports:
-      - '${APP_PORT}:${APP_PORT}'
+      - '${APP_PORT1}:${APP_PORT1}'
     volumes:
-      - .:/app
-      - /app/node_modules
+      - ./customer:/home/app
     depends_on:
       - kafka
       - customer-db
@@ -38,37 +36,35 @@ services:
     container_name: customer-db
     image: 'postgres:14.1-alpine'
     environment:
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME1}
+      POSTGRES_PASSWORD: ${DB_PASSWORD1}
+      POSTGRES_DB: ${DB_DATABASE1}
     ports:
-      - '${DB_PORT}:${DB_PORT}'
+      - '${DB_PORT1}:${DB_PORT1}'
     volumes:
       - db-data:/var/lib/postgresql/data
   # order service
   order:
-    container_name: order-backend-service
-    build:
-      context: .
-      dockerfile: order/Dockerfile
+    container_name: order-service
+    build: ./order-service
+    image: order
     ports:
-      - '${APP_PORT}:${APP_PORT}'
+      - '${APP_PORT2}:${APP_PORT2}'
     volumes:
-      - .:/app
-      - /app/node_modules
+      - ./order:/home/app
     depends_on:
       - kafka
       - order-db
   order-db:
     container_name: order-db
-    image: 'mysql:8.0.27-alpine'
+    image: 'mysql:8.0.26'
     environment:
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME2}
+      MYSQL_PASSWORD: ${DB_PASSWORD2}
+      MYSQL_DATABASE: ${DB_DATABASE2}
       MYSQL_ROOT_PASSWORD: ${DB_DATABASE_ROOT}
     ports:
-      - '${DB_PORT}:${DB_PORT}'
+      - '${DB_PORT2}:${DB_PORT2}'
     volumes:
       - db-data:/var/lib/mysql/data
 volumes:
